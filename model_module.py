@@ -140,7 +140,7 @@ def center_module (real, imag, filters, kernel_size, strides, training = True):
 #     return real, imag
 
 
-'파일을 읽어들이는 모듈'
+'READ FILE PATH'
 def walk_filename (file_path = os.path.join("./datasets\_noisy")):
 
     file_list = []
@@ -157,6 +157,7 @@ def walk_filename (file_path = os.path.join("./datasets\_noisy")):
     return file_list
 
 
+'IMPLEMENT SHORT TIME FOURIER TRANSFORM'
 def stft(data, n_fft, hop_length):
 
     result = []
@@ -170,6 +171,7 @@ def stft(data, n_fft, hop_length):
     return result
 
 
+'INVERSE STFT'
 def istft (data, hop_length):
     
     result = []
@@ -182,6 +184,7 @@ def istft (data, hop_length):
     return result
 
 
+'BINARY MASK'
 def binary_mask (clean, noisy, alpha = 1.0, criteria = 0.5):
     
     eps = np.finfo(np.float).eps
@@ -193,6 +196,7 @@ def binary_mask (clean, noisy, alpha = 1.0, criteria = 0.5):
     return mask
 
 
+'RATIO MASK'
 def ratio_mask (clean, noisy, beta = 0.5):
         
     eps = np.finfo(np.float).eps
@@ -206,6 +210,7 @@ def ratio_mask (clean, noisy, beta = 0.5):
     return mask
 
 
+'SHOW MASK'
 def show_mask (data, title, fig_size = (7, 7)):
 
     plt.rcParams["figure.figsize"] = (len(data), len(data[0]))
@@ -219,7 +224,7 @@ def show_mask (data, title, fig_size = (7, 7)):
     plt.show()
 
 
-'스펙토그램을 띄우는 모듈'
+'SHOW SPECTOGRAM'
 def show_spectogram (data, title = None, samrpling_rate = 16000, hop_length = 256, shape = (4, 8), colorbar_optional = False):
 
     if data.ndim == 3:
@@ -244,7 +249,7 @@ def show_spectogram (data, title = None, samrpling_rate = 16000, hop_length = 25
     plt.show()
 
 
-'음성 파일을 저장하는 모듈'
+'SAVE SPEECH'
 def save_file (path, speech, sr = 16000):
     for index, data in enumerate (speech):
         scipy.io.wavfile.write(str(path) + "_" + str(index+1) + ".wav", rate = sr, data = data)

@@ -21,7 +21,7 @@ def data_generator(train_arguments, test_arguments):
       return train_generator, test_generator
 
 
-def model_train(model, total_epochs, train_generator, test_generator):
+def model_train(model, optimizer, total_epochs, train_generator, test_generator):
 
       for epoch in range (total_epochs):
 
@@ -48,7 +48,7 @@ def model_train(model, total_epochs, train_generator, test_generator):
             train_loss_per_epoch = train_batch_losses / train_steps
             test_loss_per_epoch  = test_batch_losses / test_steps
 
-            templet = "Epoch : {},     TRAIN LOSS : {:.5f},     TEST LOSS  :  {:.5}"
+            templet = "Epoch : {:3d},     TRAIN LOSS : {:.5f},     TEST LOSS  :  {:.5}"
             print(templet.format(epoch+1, train_loss_per_epoch, test_loss_per_epoch))
 
       model.save_weights("./model_save/" + model_type + str(index+1) + ".h5")
@@ -58,25 +58,28 @@ def model_train(model, total_epochs, train_generator, test_generator):
 if __name__ == "__main__":
 
       parser = argparse.ArgumentParser(description = 'SETTING OPTION')
-      parser.add_argument("--epoch",    type = int, default = 500, help = "Input epochs")
-      parser.add_argument("--batch",    type = int, default = 128, help = "Input batch size")
-      parser.add_argument("--optim",    type = str, default = "adam", help = "Input optimizer option")
-      parser.add_argument("--model",    type = str, defualt = "dcunet16", help = "Input model tpe")
-      parser.add_argument("--train_noisy", type = str, default = "./datasets/train/noisy/", help = "Input train noisy path")
-      parser.add_argument("--train_clean", type = str, default = "./datasets/train/clean/", help = "Input train clean phat")
-      parser.add_argument("--test_noisy",  type = str, default = "./datasets/test/noisy/",  help = "Input test noisy path")
-      parser.add_argument("--test_clean",  type = str, default = "./datasets/test/clean/",  help = "Input test clean path")
+      parser.add_argument("--model", type = str, defualt = "dcunet20", help = "Input model tpe")
+      parser.add_argument("--epoch", type = int, default = 500, help = "Input epochs")
+      parser.add_argument("--batch", type = int, default = 128, help = "Input batch size")
+      parser.add_argument("--optim", type = str, default = "adam", help = "Input optimizer option")
+      parser.add_argument("--lr",    type = float)
+      parser.add_argument("--trn", type = str, default = "./datasets/train_noisy/", help = "Input train noisy path")
+      parser.add_argument("--tec", type = str, default = "./datasets/train_clean/", help = "Input train clean phat")
+      parser.add_argument("--ten", type = str, default = "./datasets/test_noisy/",  help = "Input test noisy path")
+      parser.add_argument("--tec", type = str, default = "./datasets/test_clean/",  help = "Input test clean path")
       args = parser.parse_args()
 
-      total_epochs = args.epoch
-      batch_size   = args.batch
-      optim        = args.optim
-      model_type   = args.model
+      model_type     = args.model
+      total_epochs   = args.epoch
+      batch_size     = args.batch
+      optimizer_type = args.optim
+      learning_rate  = args.lr
 
-      train_noisy_path = args.train_noisy
-      train_clean_path = args.train_clean
-      test_noisy_path  = args.test_noisy
-      test_clean_path  = args.test_clean
+
+      train_noisy_path = args.trn
+      train_clean_path = args.tec
+      test_noisy_path  = args.ten
+      test_clean_path  = args.tec
 
 
 train_arguments = {"inputs_ids" : os.listdir(train_noisy_path), 
@@ -101,7 +104,8 @@ if model_type == "dcunet16":
       call_model = Naive_DCUnet_16(norm_trainig = True).model()
       call_model.summary()
 
-if optim == "adam":
-      optimizer = tf.keras.optimizers.Adam(learning_rate = 3e-4, beta_1 = 0.5)
+if optimizer_type == "adam":
+      learning_rate_scheduling = schedules.ExponentialDecay(initial_learning_rate = learning_rate, decay_steps = 100000, decay_rate = 0.98)
+      optimizer = tf.keras.optimizers.Adam(learning_rate = learning_rate_scheduling, beta_1 = 0.9)
 
-model_train(call_model, total_epochs, train_generator, test_generator)
+model_train(call_model, optimizer, total_epochs, train_generator, test_generator)
