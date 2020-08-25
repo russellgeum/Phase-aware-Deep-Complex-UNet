@@ -58,13 +58,13 @@ def model_train(model, optimizer, total_epochs, train_generator, test_generator)
 if __name__ == "__main__":
 
       parser = argparse.ArgumentParser(description = 'SETTING OPTION')
-      parser.add_argument("--model", type = str, defualt = "dcunet20", help = "Input model tpe")
+      parser.add_argument("--model", type = str, default = "dcunet20", help = "Input model tpe")
       parser.add_argument("--epoch", type = int, default = 500, help = "Input epochs")
       parser.add_argument("--batch", type = int, default = 128, help = "Input batch size")
       parser.add_argument("--optim", type = str, default = "adam", help = "Input optimizer option")
-      parser.add_argument("--lr",    type = float)
+      parser.add_argument("--lr",    type = float, default = 0.002, help = "Inputs learning rate")
       parser.add_argument("--trn", type = str, default = "./datasets/train_noisy/", help = "Input train noisy path")
-      parser.add_argument("--tec", type = str, default = "./datasets/train_clean/", help = "Input train clean phat")
+      parser.add_argument("--trc", type = str, default = "./datasets/train_clean/", help = "Input train clean phat")
       parser.add_argument("--ten", type = str, default = "./datasets/test_noisy/",  help = "Input test noisy path")
       parser.add_argument("--tec", type = str, default = "./datasets/test_clean/",  help = "Input test clean path")
       args = parser.parse_args()
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
 
       train_noisy_path = args.trn
-      train_clean_path = args.tec
+      train_clean_path = args.trc
       test_noisy_path  = args.ten
       test_clean_path  = args.tec
 
