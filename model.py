@@ -161,7 +161,7 @@ class Naive_DCUnet_20 (tf.keras.Model):
         real, imag = self.decoder4(real, imag, conv_real7, conv_imag7, True)
         real, imag = self.decoder5(real, imag, conv_real6, conv_imag6, True)
         real, imag = self.decoder6(real, imag, conv_real5, conv_imag5, True)
-        
+
         real, imag = self.decoder7(real, imag, conv_real4, conv_imag4, True)
         real, imag = self.decoder8(real, imag, conv_real3, conv_imag3, True)
         real, imag = self.decoder9(real, imag, conv_real2, conv_imag2, True)
@@ -178,10 +178,10 @@ class Naive_DCUnet_20 (tf.keras.Model):
 
 if __name__ == "__main__":
     
-    noisy = Input(shape = (16384,1), name = "noisy_speech")
+    noisy = Input(shape = (16384, 1), name = "noisy_speech")
     DCUnet16 = Naive_DCUnet_16()
     DCUnet20 = Naive_DCUnet_20()
-    clean = DCUnet16(noisy)
-    clean = DCUnet20(noisy)
+    DCUnet16(noisy)
+    DCUnet20(noisy)
     DCUnet16.summary()
     DCUnet20.summary()

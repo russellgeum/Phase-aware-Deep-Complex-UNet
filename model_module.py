@@ -4,7 +4,8 @@ import scipy.io.wavfile
 import librosa
 from librosa.display import *
 
-import os, ssl
+import os
+import ssl
 import natsort
 from tqdm import tqdm
 import numpy as np
@@ -53,7 +54,7 @@ def convert2sequnce (real, imag):
     
     return real, imag
     
-    
+
 @tf.function
 def mask_processing (real, imag, stft_real, stft_imag):
     

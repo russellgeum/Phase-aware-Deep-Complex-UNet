@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
       parser = argparse.ArgumentParser(description = 'MODEL SETTING OPTION...')
       parser.add_argument("--model", type = str, default = "dcunet20", help = "Input model tpe")
-      parser.add_argument("--epoch", type = int, default = 500, help = "Input epochs")
+      parser.add_argument("--epoch", type = int, default = 200, help = "Input epochs")
       parser.add_argument("--batch", type = int, default = 128, help = "Input batch size")
       parser.add_argument("--optim", type = str, default = "adam",  help = "Input optimizer option")
       parser.add_argument("--lr",    type = float, default = 0.002, help = "Inputs learning rate")
@@ -122,12 +122,13 @@ test_step  = len(os.listdir(test_noisy_path)) // batch_size
 print("TRAIN STEPS, TEST STEPS   ", train_step, test_step)
 
 
+noisy_speech = Input(shape = (16384, 1), name = "noisy_speech")
 if   model_type == "dcunet16":
-      selected_model = Naive_DCUnet_16(norm_trainig = True).model()
-      selected_model.summary()
+      selected_model = Naive_DCUnet_16()
+      selected_model(noisy_speech)
 elif model_type == "dcunet20":
-      selected_model = Naive_DCUnet_20(norm_trainig = True).model()
-      selected_model.summary()
+      selected_model = Naive_DCUnet_20()
+      selected_model(noisy_speech)
 
 if optimizer_type == "adam":
       learning_rate_scheduling = schedules.ExponentialDecay(initial_learning_rate = learning_rate, decay_steps = 100000, decay_rate = 0.96)
