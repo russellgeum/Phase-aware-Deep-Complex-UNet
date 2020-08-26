@@ -13,6 +13,7 @@ from complex_layers.activations import *
 speech_length = 16384
 sampling_rate = 16000
 
+
 'GET UNSEEN SPEECH FILE PATH'
 def get_file_list (file_path):
 
@@ -34,19 +35,19 @@ def get_file_list (file_path):
 'INFERENCE DEEP LEARNING MODEL'
 def inference (path_list, save_path):
 
-      for index1, speech_file_path in enumerate (path_list):
+      for speech_file_index, speech_file_path in enumerate (path_list):
             _, unseen_noisy_speech = scipy.io.wavfile.read(speech_file_path)
       
             restore = []
             
-            for index2 in range (int(len(unseen_noisy_speech) / speech_split_length)):
-                  split_speech = unseen_noisy_speech[speech_split_length * index2 : speech_split_length * (index2 + 1)]
+            for split_index in range (int(len(unseen_noisy_speech) / speech_split_length)):
+                  split_speech = unseen_noisy_speech[speech_split_length * split_index : speech_split_length * (split_index + 1)]
                   split_speech = np.reshape(split_speech, (1, speech_split_length, 1))
                   enhancement_speech = model.predict([split_speech])
                   predict = np.reshape(enhancement_speech, (speech_split_length, 1))
                   restore.extend(predict)
             restore = np.array(restore)
-            scipy.io.wavfile.write("./model_pred/2000825_" + str(index1+1) + ".wav", rate = sampling_rate, data = restore)
+            scipy.io.wavfile.write("./model_pred/2000825_" + str(speech_file_index + 1) + ".wav", rate = sampling_rate, data = restore)
 
 
 

@@ -8,8 +8,8 @@ from tensorflow.keras.layers import InputSpec
 'https://github.com/fchollet/keras/blob/master/keras/layers/normalization.py'
 
 
-# Complex Dense
-##################################################################################################
+
+'COMPLEX DENSE'
 class complex_Dense(tf.keras.layers.Layer):
     """
     tf.keras.layers.Dense(
@@ -80,8 +80,7 @@ class complex_Dense(tf.keras.layers.Layer):
 
 
 
-# Complex Convolution
-##################################################################################################
+'COMPLEX CONVOLUTION 2D'
 class complex_Conv2D (tf.keras.layers.Layer):
     
     def __init__(self, 
@@ -138,9 +137,8 @@ class complex_Conv2D (tf.keras.layers.Layer):
 
 
 
-# Complex Transpose Conovolution
-##################################################################################################
-class conplex_Conv2DTranspose (tf.keras.layers.Layer):
+'COMPLEX CONV 2D TRANSPOSE'
+class complex_Conv2DTranspose (tf.keras.layers.Layer):
 
 
     def __init__(self,  filters = 32,
@@ -152,7 +150,7 @@ class conplex_Conv2DTranspose (tf.keras.layers.Layer):
                         kernel_initializer = 'glorot_uniform',
                         bias_initializer   = 'zeros'):
         
-        super(conplex_Conv2DTranspose, self).__init__()
+        super(complex_Conv2DTranspose, self).__init__()
 
         self.filters = filters
         self.kernel_size = kernel_size
@@ -184,7 +182,7 @@ class conplex_Conv2DTranspose (tf.keras.layers.Layer):
                                                         kernel_initializer = self.kernel_initializer, 
                                                         bias_initializer = self.bias_initializer)
         
-        super(conplex_Conv2DTranspose, self).build(inputs_shape)
+        super(complex_Conv2DTranspose, self).build(inputs_shape)
 
         
     def call (self, real_inputs, imag_inputs):
@@ -196,14 +194,10 @@ class conplex_Conv2DTranspose (tf.keras.layers.Layer):
 
 
 
-# Complex Pooling 
-##################################################################################################
+'COMPLEX POOLING'
 class complex_MaxPooling (tf.keras.layers.Layer):
 
-    def __init__(self,
-                pool_size = (2, 2), 
-                strides   = (1, 1),
-                padding   = "same"):
+    def __init__(self, pool_size = (2, 2), strides   = (1, 1), padding   = "same"):
 
         super(complex_MaxPooling, self).__init__()
 
@@ -239,11 +233,12 @@ class complex_MaxPooling (tf.keras.layers.Layer):
 class complex_NaiveBatchNormalization (tf.keras.layers.Layer):
 
     def __init__(self):
-        
+
         super(complex_NaiveBatchNormalization, self).__init__()
 
+
     def build (self, inputs_shape):
-        
+
         self.real_batchnormalization = tf.keras.layers.BatchNormalization()
         self.imag_batchnormalization = tf.keras.layers.BatchNormalization()
         
