@@ -67,7 +67,7 @@ def model_flow (model, optimizer, total_epochs, train_generator, test_generator)
             test_loss  = test_batch_losses / test_steps
 
             templet = "Epoch : {:3d},     TRAIN LOSS : {:.5f},     TEST LOSS  :  {:.5f}"
-            print("templet".format(epoch+1, train_loss.numpy(), test_loss.numpy()))
+            print(templet.format(epoch+1, train_loss.numpy(), test_loss.numpy()))
 
             if ((epoch+1) % 10) == 0: 
                   model.save_weights("./model_save/" + model_type + str(epoch+1) + ".h5")

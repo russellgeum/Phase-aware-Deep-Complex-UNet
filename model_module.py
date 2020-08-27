@@ -63,7 +63,6 @@ def mask_processing (real, imag, stft_real, stft_imag):
 
     enhancement_real = stft_real * mask_real - stft_imag * mask_imag
     enhancement_imag = stft_real * mask_imag + stft_imag * mask_real
-
     
     return enhancement_real, enhancement_imag
 
