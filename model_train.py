@@ -9,6 +9,7 @@ from complex_layers.STFT import *
 from complex_layers.networks import *
 from complex_layers.activations import *
 
+
 'PRINT SYSTEM INFORMATION'
 print(tf.config.list_physical_devices())
 print("GPU Available: ", tf.test.is_gpu_available('GPU'))
@@ -22,7 +23,6 @@ def data_generator(train_arguments, test_arguments):
       return train_generator, test_generator
 
 
-@tf.function
 def loop_train (model, train_noisy_speech, train_clean_speech, train_batch_losses):
 
       with tf.GradientTape() as tape:
@@ -35,8 +35,6 @@ def loop_train (model, train_noisy_speech, train_clean_speech, train_batch_losse
       return train_loss
 
 
-
-@tf.function
 def loop_test (model, test_noisy_speech, test_clean_speech, test_batch_losses):
       
       'Test loop do not caclultae gradient and backpropagation'
@@ -45,7 +43,6 @@ def loop_test (model, test_noisy_speech, test_clean_speech, test_batch_losses):
 
       return test_loss
       
-
 
 def model_flow (model, optimizer, total_epochs, train_generator, test_generator):
 
@@ -74,8 +71,6 @@ def model_flow (model, optimizer, total_epochs, train_generator, test_generator)
 
             if ((epoch+1) % 10) == 0: 
                   model.save_weights("./model_save/" + model_type + str(epoch+1) + ".h5")
-
-
 
 
 
@@ -122,13 +117,12 @@ test_step  = len(os.listdir(test_noisy_path)) // batch_size
 print("TRAIN STEPS, TEST STEPS   ", train_step, test_step)
 
 
-noisy_speech = Input(shape = (16384, 1), name = "noisy_speech")
 if   model_type == "dcunet16":
-      selected_model = Naive_DCUnet_16()
-      selected_model(noisy_speech)
+      selected_model = Naive_DCUnet16().model()
+      selected_model.summary()
 elif model_type == "dcunet20":
-      selected_model = Naive_DCUnet_20()
-      selected_model(noisy_speech)
+      selected_model = Naive_DCUnet20().model()
+      selected_model.summary()
 
 if optimizer_type == "adam":
       learning_rate_scheduling = schedules.ExponentialDecay(initial_learning_rate = learning_rate, decay_steps = 100000, decay_rate = 0.96)

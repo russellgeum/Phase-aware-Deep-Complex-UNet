@@ -4,8 +4,7 @@ import scipy.io.wavfile
 import librosa
 from librosa.display import *
 
-import os
-import ssl
+import os, ssl
 import natsort
 from tqdm import tqdm
 import numpy as np
@@ -31,7 +30,6 @@ from complex_layers.activations import *
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 'Converting from sequence to image, Converting from image to seqeunce'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-@tf.function
 def convert2image (real, imag):
     
     real = tf.transpose(real, perm = (0, 2, 1))
@@ -43,7 +41,6 @@ def convert2image (real, imag):
     return real, imag
 
 
-@tf.function
 def convert2sequnce (real, imag):
     
     real = tf.transpose(real, (0, 2, 1, 3))
@@ -55,14 +52,11 @@ def convert2sequnce (real, imag):
     return real, imag
     
 
-@tf.function
 def mask_processing (real, imag, stft_real, stft_imag):
     
-    norm  = tf.sqrt(tf.square(real) + tf.square(imag))
-    magnitude  = tf.tanh(norm)
-
-    unit_real = tf.divide(real, norm)
-    unit_imag = tf.divide(imag, norm)
+    magnitude = tf.tanh(tf.sqrt(tf.square(real) + tf.square(imag)))
+    unit_real = tf.divide(real, tf.sqrt(tf.square(real) + tf.square(imag)))
+    unit_imag = tf.divide(imag, tf.sqrt(tf.square(real) + tf.square(imag)))
 
     mask_real = tf.multiply(magnitude, unit_real)
     mask_imag = tf.multiply(magnitude, unit_imag)
@@ -78,108 +72,88 @@ def mask_processing (real, imag, stft_real, stft_imag):
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 'with Naive complex_BatchNormalization module'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-class encoder (tf.keras.layers.Layer):
-
-
-    def __init__ (self, filters, kernel_size, strides, name = "Encoder"): 
-
-        super(encoder, self).__init__()
-
-        self.filters     = filters
-        self.kernel_size = kernel_size
-        self.strides     = strides
-
-        self.complex_Conv2D = complex_Conv2D(filters = self.filters, kernel_size = self.kernel_size, strides = self.strides)
-        self.complex_NaiveBatchNormalization = complex_NaiveBatchNormalization()
-
-
-    def call (self, real, imag, training = True):
-
-        conv_real, conv_imag = self.complex_Conv2D(real, imag)
-        out_real, out_imag   = CLeaky_ReLU(conv_real, conv_real)
-        out_real, out_imag   = self.complex_NaiveBatchNormalization(conv_real, conv_imag, training)
-
-        return out_real, out_imag, conv_real, conv_imag
+def encoder_module (real, imag, filters, kernel_size, strides, training = True):
+    
+    conv_real, conv_imag = complex_Conv2D(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
+    out_real, out_imag   = CLeaky_ReLU(conv_real, conv_imag)
+    out_real, out_imag   = complex_NaiveBatchNormalization()(conv_real, conv_imag, training = training)
+    
+    return out_real, out_imag, conv_real, conv_imag
 
 
 
-class decoder (tf.keras.layers.Layer):
+def decoder_module (real, imag, concat_real, concat_imag, filters, kernel_size, strides, training = True):
+
+    if concat_real == None and concat_imag == None:
+        pass
+    else:
+        real = concatenate([real, concat_real], axis = 3)
+        imag = concatenate([imag, concat_imag], axis = 3)
+    deconv_real, deconv_imag = complex_Conv2DTranspose(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
+    deconv_real, deconv_imag = CLeaky_ReLU(deconv_real, deconv_imag)
+    deconv_real, deconv_imag = complex_NaiveBatchNormalization()(deconv_real, deconv_imag, training = training)
+    
+    return deconv_real, deconv_imag
 
 
-    def __init__ (self, filters, kernel_size, strides, name = "Decoder"):
-
-        super(decoder, self).__init__()
-
-        self.filters     = filters
-        self.kernel_size = kernel_size
-        self.strides     = strides
-
-        self.complex_Conv2DTranspose = complex_Conv2DTranspose(filters = self.filters, kernel_size = self.kernel_size, strides = self.strides)
-        self.complex_NaiveBatchNormalization = complex_NaiveBatchNormalization()
+# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+# 'with Naive complex_BatchNormalization module'
+# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+# class encoder (tf.keras.layers.Layer):
 
 
-    def call (self, real, imag, concat_real = None, concat_imag = None, training = True):
+#     def __init__ (self, filters, kernel_size, strides, name = "Encoder"): 
 
-        if concat_real is None and concat_imag is None:
-            pass
+#         super(encoder, self).__init__()
 
-        else:
-            real = concatenate([real, concat_real], axis = 3)
-            imag = concatenate([imag, concat_imag], axis = 3)
+#         self.filters     = filters
+#         self.kernel_size = kernel_size
+#         self.strides     = strides
 
-        deconv_real, deconv_imag = self.complex_Conv2DTranspose(real, imag)
-        deconv_real, deconv_imag = CLeaky_ReLU(deconv_real, deconv_imag)
-        deconv_real, deconv_imag = self.complex_NaiveBatchNormalization(deconv_real, deconv_imag, training = training)
+#         self.complex_Conv2D = complex_Conv2D(filters = self.filters, kernel_size = self.kernel_size, strides = self.strides)
+#         self.complex_NaiveBatchNormalization = complex_NaiveBatchNormalization()
+
+
+#     def call (self, real, imag, training = True):
+
+#         conv_real, conv_imag = self.complex_Conv2D(real, imag)
+#         out_real, out_imag   = CLeaky_ReLU(conv_real, conv_real)
+#         out_real, out_imag   = self.complex_NaiveBatchNormalization(conv_real, conv_imag, training)
+
+#         return out_real, out_imag, conv_real, conv_imag
+
+
+
+# class decoder (tf.keras.layers.Layer):
+
+
+#     def __init__ (self, filters, kernel_size, strides, name = "Decoder"):
+
+#         super(decoder, self).__init__()
+
+#         self.filters     = filters
+#         self.kernel_size = kernel_size
+#         self.strides     = strides
+
+#         self.complex_Conv2DTranspose = complex_Conv2DTranspose(filters = self.filters, kernel_size = self.kernel_size, strides = self.strides)
+#         self.complex_NaiveBatchNormalization = complex_NaiveBatchNormalization()
+
+
+#     def call (self, real, imag, concat_real = None, concat_imag = None, training = True):
+
+#         if concat_real is None and concat_imag is None:
+#             pass
+
+#         else:
+#             real = concatenate([real, concat_real], axis = 3)
+#             imag = concatenate([imag, concat_imag], axis = 3)
+
+#         deconv_real, deconv_imag = self.complex_Conv2DTranspose(real, imag)
+#         deconv_real, deconv_imag = CLeaky_ReLU(deconv_real, deconv_imag)
+#         deconv_real, deconv_imag = self.complex_NaiveBatchNormalization(deconv_real, deconv_imag, training = training)
         
-        return deconv_real, deconv_imag
+#         return deconv_real, deconv_imag
 
-
-
-# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-# 'with Covariance complex_BatchNormalization module'
-# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-# def cov_encoder_module (real, imag, filters, kernel_size, strides, training = True):
-    
-#     conv_real, conv_imag = complex_Conv2D(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
-#     conv_real, conv_imag = CLeaky_ReLU(conv_real, conv_imag)
-
-#     batchnorm_inputs     = tf.concat([conv_real, conv_imag], axis = 3)
-#     batchnorm_outputs    = complex_BatchNormalization()(batchnorm_inputs, training = training)
-
-#     out_real = batchnorm_outputs[:, :, :, 0:1]
-#     out_imag = batchnorm_outputs[:, :, :, 1:2]
-    
-#     return out_real, out_imag, conv_real, conv_imag
-
-
-# def cov_decoder_module (real, imag, concat_real, concat_imag, filters, kernel_size, strides, training = True):
-
-#     real = concatenate([real, concat_real], axis = 3)
-#     imag = concatenate([imag, concat_imag], axis = 3)
-#     deconv_real, deconv_imag = conplex_Conv2DTranspose(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
-#     deconv_real, deconv_imag = CLeaky_ReLU(deconv_real, deconv_imag)
-
-#     batchnorm_inputs     = tf.concat([deconv_real, deconv_imag], axis = 3)
-#     batchnorm_outputs    = complex_BatchNormalization()(batchnorm_inputs, training = training)
-
-#     deconv_real = batchnorm_outputs[:, :, :, 0:1]
-#     deconv_imag = batchnorm_outputs[:, :, :, 1:2]
-    
-#     return deconv_real, deconv_imag
-
-
-# def cov_center_module (real, imag, filters, kernel_size, strides, training = True):
-
-#     real, imag = conplex_Conv2DTranspose(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
-#     real, imag = CLeaky_ReLU(real, imag)
-
-#     batchnorm_inputs     = tf.concat([real, imag], axis = 3)
-#     batchnorm_inputs     = complex_BatchNormalization()(batchnorm_inputs, training = training)
-
-#     real = batchnorm_inputs[:, :, :, 0:1]
-#     imag = batchnorm_inputs[:, :, :, 1:2]
-    
-#     return real, imag
 
 
 'READ FILE PATH'
