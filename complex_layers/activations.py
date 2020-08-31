@@ -23,16 +23,11 @@ def zReLU (real, imag):
     real = tf.keras.layers.ReLU()(real)
     imag = tf.keras.layers.ReLU()(imag)
     
-    # 각 parts를 값이 있으면 True == 1로 만들고, 값이 0이면 False == 0을 반환
     real_flag = tf.cast(tf.cast(real, tf.bool), tf.float32)
     imag_flag = tf.cast(tf.cast(imag, tf.bool), tf.float32)
     
-    # 각 part가 True == 1이면 1 반환, 하나라도 False == 0이면 0반환
-    # 그래서 real, imag 중 하나라도 축 위에 값이 있으면 flag는 (0, ...) 이다.
     flag = real_flag * imag_flag
 
-    # flag과 행렬끼리 원소곱을 하여, flag (1, ...)에서는 ReLU를 유지
-    # (0, ...) flag에서는 값을 기각한다.
     real = tf.math.multiply(real, flag)
     imag = tf.math.multiply(imag, flag)
 
