@@ -24,13 +24,34 @@ from tensorflow.python.client import device_lib
 from complex_layers.STFT import *
 from complex_layers.networks import *
 from complex_layers.activations import *
+from complex_layers.normalization import *
 
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-'Converting from sequence to image, Converting from image to seqeunce'
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-def convert2image (real, imag):
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+tranposed_STFT  : transpoed Spectogram, ex) [None, 64, 512] --> [None, 512, 64, 1]
+transpoed_ISTFT : transpoed and squeeze Spectogram (For Inverse Short Time Fourier Transform) [None 512 64 1] --> [None 64 512]
+mask_processing : outputs of complex Unet would be multipled with complex ratio mask (modified)
+
+complex_layers/
+    activation.py
+        Cleaky_ReLU
+    networks.py
+        complex_Conv2D
+        complex_Conv2DTranspose
+    normalization.py
+        complex_NaiveBatchNormalization
+        complex_BatchNormalization2d
+    STFT.py
+        STFT_layer
+        ISTFT_layer
+    
+    networks.py, normalization.py, STFT.py All class module (Not activation.py)
+    So, We create custom function module using class complex layers...
+    But, Because inputs of complex_Batchnoramlization has to be combined, [real, imag] (concat) ==> inputs
+    Make a seperate function module (complex BatchNomalization)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+def tranposed_STFT (real, imag):
     
     real = tf.transpose(real, perm = (0, 2, 1))
     imag = tf.transpose(imag, perm = (0, 2, 1))
@@ -41,7 +62,7 @@ def convert2image (real, imag):
     return real, imag
 
 
-def convert2sequnce (real, imag):
+def transpoed_ISTFT (real, imag):
     
     real = tf.transpose(real, (0, 2, 1, 3))
     imag = tf.transpose(imag, (0, 2, 1, 3))
@@ -67,6 +88,17 @@ def mask_processing (real, imag, stft_real, stft_imag):
     return enhancement_real, enhancement_imag
 
 
+def complex_BatchNormalization2d (real, imag, training = None):
+
+    inputs = tf.concat([real, imag], axis = -1)
+    outputs = complex_BatchNorm2d()(inputs, training = training)
+
+    input_dim = outputs.shape[-1] // 2
+    real = outputs[ :, :, :, :input_dim]
+    imag = outputs[ :, :, :, input_dim:]
+
+    return real, imag
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 'with Naive complex_BatchNormalization module'
@@ -75,10 +107,9 @@ def encoder_module (real, imag, filters, kernel_size, strides, training = True):
     
     conv_real, conv_imag = complex_Conv2D(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
     out_real, out_imag   = CLeaky_ReLU(conv_real, conv_imag)
-    out_real, out_imag   = complex_NaiveBatchNormalization()(conv_real, conv_imag, training = training)
+    out_real, out_imag   = complex_NaiveBatchNormalization()(conv_real, conv_imag, training = True)
     
     return out_real, out_imag, conv_real, conv_imag
-
 
 
 def decoder_module (real, imag, concat_real, concat_imag, filters, kernel_size, strides, training = True):
@@ -90,181 +121,147 @@ def decoder_module (real, imag, concat_real, concat_imag, filters, kernel_size, 
         imag = concatenate([imag, concat_imag], axis = 3)
     deconv_real, deconv_imag = complex_Conv2DTranspose(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
     deconv_real, deconv_imag = CLeaky_ReLU(deconv_real, deconv_imag)
-    deconv_real, deconv_imag = complex_NaiveBatchNormalization()(deconv_real, deconv_imag, training = training)
+    deconv_real, deconv_imag = complex_NaiveBatchNormalization()(deconv_real, deconv_imag, training = True)
     
     return deconv_real, deconv_imag
 
 
-# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-# 'with Naive complex_BatchNormalization module'
-# """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-# class encoder (tf.keras.layers.Layer):
-
-
-#     def __init__ (self, filters, kernel_size, strides, name = "Encoder"): 
-
-#         super(encoder, self).__init__()
-
-#         self.filters     = filters
-#         self.kernel_size = kernel_size
-#         self.strides     = strides
-
-#         self.complex_Conv2D = complex_Conv2D(filters = self.filters, kernel_size = self.kernel_size, strides = self.strides)
-#         self.complex_NaiveBatchNormalization = complex_NaiveBatchNormalization()
-
-
-#     def call (self, real, imag, training = True):
-
-#         conv_real, conv_imag = self.complex_Conv2D(real, imag)
-#         out_real, out_imag   = CLeaky_ReLU(conv_real, conv_real)
-#         out_real, out_imag   = self.complex_NaiveBatchNormalization(conv_real, conv_imag, training)
-
-#         return out_real, out_imag, conv_real, conv_imag
-
-
-
-# class decoder (tf.keras.layers.Layer):
-
-
-#     def __init__ (self, filters, kernel_size, strides, name = "Decoder"):
-
-#         super(decoder, self).__init__()
-
-#         self.filters     = filters
-#         self.kernel_size = kernel_size
-#         self.strides     = strides
-
-#         self.complex_Conv2DTranspose = complex_Conv2DTranspose(filters = self.filters, kernel_size = self.kernel_size, strides = self.strides)
-#         self.complex_NaiveBatchNormalization = complex_NaiveBatchNormalization()
-
-
-#     def call (self, real, imag, concat_real = None, concat_imag = None, training = True):
-
-#         if concat_real is None and concat_imag is None:
-#             pass
-
-#         else:
-#             real = concatenate([real, concat_real], axis = 3)
-#             imag = concatenate([imag, concat_imag], axis = 3)
-
-#         deconv_real, deconv_imag = self.complex_Conv2DTranspose(real, imag)
-#         deconv_real, deconv_imag = CLeaky_ReLU(deconv_real, deconv_imag)
-#         deconv_real, deconv_imag = self.complex_NaiveBatchNormalization(deconv_real, deconv_imag, training = training)
-        
-#         return deconv_real, deconv_imag
-
-
-
-'READ FILE PATH'
-def walk_filename (file_path = os.path.join("./datasets\_noisy")):
-
-    file_list = []
-
-    for root, dirs, files in tqdm(os.walk(file_path)):
-        for fname in files:
-            if fname == "desktop.ini" or fname == ".DS_Store": continue 
-
-            full_fname = os.path.join(root, fname)
-            file_list.append(full_fname)
-
-    file_list = natsort.natsorted(file_list, reverse = False)
-
-    return file_list
-
-
-'IMPLEMENT SHORT TIME FOURIER TRANSFORM'
-def stft(data, n_fft, hop_length):
-
-    result = []
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+'with Naive complex_BatchNormalization module'
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+def convariance_encoder_module (real, imag, filters, kernel_size, strides, training = True):
     
-    for index in range (len(data)):
-        result.append(librosa.core.stft(y = data[index], 
-                                        n_fft = n_fft,
-                                        hop_length = hop_length, 
-                                        win_length = n_fft))
-                      
-    return result
-
-
-'INVERSE STFT'
-def istft (data, hop_length):
+    conv_real, conv_imag = complex_Conv2D(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
+    out_real, out_imag   = CLeaky_ReLU(conv_real, conv_imag)
+    out_real, out_imag   = complex_BatchNormalization2d(conv_real, conv_imag, training = True)
     
-    result = []
-    data = np.reshape(data, (len(data), len(data[0]), len(data[0])))
-    
-    for index in range (len(data)):
-        result.append(librosa.core.istft(data[index],
-                                        hop_length = hop_length))
-        
-    return result
+    return out_real, out_imag, conv_real, conv_imag
 
 
-'BINARY MASK'
-def binary_mask (clean, noisy, alpha = 1.0, criteria = 0.5):
-    
-    eps = np.finfo(np.float).eps
+def convariance_decoder_module (real, imag, concat_real, concat_imag, filters, kernel_size, strides, training = True):
 
-    mask = np.divide(np.abs(clean)**alpha, (eps + np.abs(noisy))**alpha)
-    mask[np.where(mask >= criteria)] = 1.
-    mask[np.where(mask <= criteria)] = 0.
-    
-    return mask
-
-
-'RATIO MASK'
-def ratio_mask (clean, noisy, beta = 0.5):
-        
-    eps = np.finfo(np.float).eps
-    noisy = noisy - clean
-    
-    clean = np.abs(clean)**2
-    noisy = np.abs(noisy)**2
-    
-    mask = np.divide(clean, (eps + clean + noisy)) ** beta
-
-    return mask
-
-
-'SHOW MASK'
-def show_mask (data, title, fig_size = (7, 7)):
-
-    plt.rcParams["figure.figsize"] = (len(data), len(data[0]))
-    plt.rcParams.update({'font.size': 10})
-    
-    data = np.reshape(data, (len(data), len(data[0])))
-    data = np.flip(data, axis = 0)
-    
-    plt.title(title)
-    plt.imshow(data)
-    plt.show()
-
-
-'SHOW SPECTOGRAM'
-def show_spectogram (data, title = None, samrpling_rate = 16000, hop_length = 256, shape = (4, 8), colorbar_optional = False):
-
-    if data.ndim == 3:
-        data = np.squeeze(data, axis = 0)
-    
-    plt.rcParams["figure.figsize"] = shape
-    plt.rcParams.update({'font.size': 10})
-    
-    data = np.reshape(data, (len(data), len(data[0])))
-    data = librosa.amplitude_to_db(np.abs(data), ref=np.max)
-    librosa.display.specshow(data, y_axis = 'hz', x_axis = 'time', sr = 16000, hop_length = 256)
-
-    if title:
-        plt.title(title)
-    else: pass
-    
-    if colorbar_optional == True: 
-        plt.colorbar(format = '%+2.0f dB')
-    elif colorbar_optional == False:
+    if concat_real == None and concat_imag == None:
         pass
+    else:
+        real = concatenate([real, concat_real], axis = 3)
+        imag = concatenate([imag, concat_imag], axis = 3)
+    deconv_real, deconv_imag = complex_Conv2DTranspose(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
+    deconv_real, deconv_imag = CLeaky_ReLU(deconv_real, deconv_imag)
+    deconv_real, deconv_imag = complex_BatchNormalization2d(deconv_real, deconv_imag, training = True)
+    
+    return deconv_real, deconv_imag
 
-    plt.show()
+
+# 'READ FILE PATH'
+# def walk_filename (file_path = os.path.join("./datasets\_noisy")):
+
+#     file_list = []
+
+#     for root, dirs, files in tqdm(os.walk(file_path)):
+#         for fname in files:
+#             if fname == "desktop.ini" or fname == ".DS_Store": continue 
+
+#             full_fname = os.path.join(root, fname)
+#             file_list.append(full_fname)
+
+#     file_list = natsort.natsorted(file_list, reverse = False)
+
+#     return file_list
 
 
-'SAVE SPEECH'
-def save_file (path, speech, sr = 16000):
-    for index, data in enumerate (speech):
-        scipy.io.wavfile.write(str(path) + "_" + str(index+1) + ".wav", rate = sr, data = data)
+# 'IMPLEMENT SHORT TIME FOURIER TRANSFORM'
+# def stft(data, n_fft, hop_length):
+
+#     result = []
+    
+#     for index in range (len(data)):
+#         result.append(librosa.core.stft(y = data[index], 
+#                                         n_fft = n_fft,
+#                                         hop_length = hop_length, 
+#                                         win_length = n_fft))
+                      
+#     return result
+
+
+# 'INVERSE STFT'
+# def istft (data, hop_length):
+    
+#     result = []
+#     data = np.reshape(data, (len(data), len(data[0]), len(data[0])))
+    
+#     for index in range (len(data)):
+#         result.append(librosa.core.istft(data[index],
+#                                         hop_length = hop_length))
+        
+#     return result
+
+
+# 'BINARY MASK'
+# def binary_mask (clean, noisy, alpha = 1.0, criteria = 0.5):
+    
+#     eps = np.finfo(np.float).eps
+
+#     mask = np.divide(np.abs(clean)**alpha, (eps + np.abs(noisy))**alpha)
+#     mask[np.where(mask >= criteria)] = 1.
+#     mask[np.where(mask <= criteria)] = 0.
+    
+#     return mask
+
+
+# 'RATIO MASK'
+# def ratio_mask (clean, noisy, beta = 0.5):
+        
+#     eps = np.finfo(np.float).eps
+#     noisy = noisy - clean
+    
+#     clean = np.abs(clean)**2
+#     noisy = np.abs(noisy)**2
+    
+#     mask = np.divide(clean, (eps + clean + noisy)) ** beta
+
+#     return mask
+
+
+# 'SHOW MASK'
+# def show_mask (data, title, fig_size = (7, 7)):
+
+#     plt.rcParams["figure.figsize"] = (len(data), len(data[0]))
+#     plt.rcParams.update({'font.size': 10})
+    
+#     data = np.reshape(data, (len(data), len(data[0])))
+#     data = np.flip(data, axis = 0)
+    
+#     plt.title(title)
+#     plt.imshow(data)
+#     plt.show()
+
+
+# 'SHOW SPECTOGRAM'
+# def show_spectogram (data, title = None, samrpling_rate = 16000, hop_length = 256, shape = (4, 8), colorbar_optional = False):
+
+#     if data.ndim == 3:
+#         data = np.squeeze(data, axis = 0)
+    
+#     plt.rcParams["figure.figsize"] = shape
+#     plt.rcParams.update({'font.size': 10})
+    
+#     data = np.reshape(data, (len(data), len(data[0])))
+#     data = librosa.amplitude_to_db(np.abs(data), ref=np.max)
+#     librosa.display.specshow(data, y_axis = 'hz', x_axis = 'time', sr = 16000, hop_length = 256)
+
+#     if title:
+#         plt.title(title)
+#     else: pass
+    
+#     if colorbar_optional == True: 
+#         plt.colorbar(format = '%+2.0f dB')
+#     elif colorbar_optional == False:
+#         pass
+
+#     plt.show()
+
+
+# 'SAVE SPEECH'
+# def save_file (path, speech, sr = 16000):
+#     for index, data in enumerate (speech):
+#         scipy.io.wavfile.write(str(path) + "_" + str(index+1) + ".wav", rate = sr, data = data)

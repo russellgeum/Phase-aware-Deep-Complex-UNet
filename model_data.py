@@ -1,7 +1,6 @@
 from model_module import *
 
 
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 'DATAGENERATOR'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -39,7 +38,6 @@ class datagenerator (tf.keras.utils.Sequence):
         self.on_epoch_end()
 
 
-    # for printing the statistics of the function
     def on_epoch_end(self):
         'Updates indexes after each epoch'
         'epoch가 끌날 때마다 인덱스를 다시 shuffle하는 옵션'
@@ -51,8 +49,7 @@ class datagenerator (tf.keras.utils.Sequence):
 
     def __data_generation__(self, inputs_ids, outputs_ids):
         'Generates data containing batch_size samples'
-        # Initialization
-        # 데이터 네임과 데이터 디렉토리로 전체 경로를 잡고 그 경로에서 소리 파일 로드
+        '데이터 네임과 데이터 디렉토리로 전체 경로를 잡고 그 경로에서 소리 파일 로드'
         inputs_path = os.path.join(self.inputs_dir + inputs_ids) 
         outputs_path = os.path.join(self.outputs_dir + outputs_ids)
 
@@ -65,25 +62,16 @@ class datagenerator (tf.keras.utils.Sequence):
 
     def __len__(self):
         "Denotes the number of batches per epoch"
-        # self.id_names : 존재하는 총 이미지 개수를 의미합니다.
-        # self.batch_size : 배치사이즈를 의미합니다.
-        # 전체 데이터 갯수에서 배치 사이즈로 나눈 것 == 1 epoch당 iteration 수
+        '''
+        self.id_names : 존재하는 총 이미지 개수를 의미합니다.
+        self.batch_size : 배치사이즈를 의미합니다.
+        전체 데이터 갯수에서 배치 사이즈로 나눈 것 == 1 epoch당 iteration 수
+        '''
 
         return int(np.floor(len(self.inputs_ids) / self.batch_size))
 
 
     def __getitem__(self, index):
-        # index : batch no.
-        # Generate indexes of the batch
-
-        # self.inputs_ids  = inputs_ids
-        # self.outputs1_ids = outputs1_ids
-        # self.outputs2_ids = outputs2_ids
-
-        # self.inputs_dir  = inputs_dir
-        # self.outputs1_dir = outputs1_dir
-        # self.outputs2_dir = output2_dir
-
         """
         1. 한 epoch에서 매 배치를 반복할 때마다 해당하는 인덱스를 호출
         2. 각 데이터의 아이디에서 해당 배치의 인덱스를 할당
@@ -94,7 +82,7 @@ class datagenerator (tf.keras.utils.Sequence):
         """
         indexes = self.indexes[index * self.batch_size: (index + 1) * self.batch_size]
 
-        inputs_batch_ids = [self.inputs_ids[k] for k in indexes]
+        inputs_batch_ids  = [self.inputs_ids[k] for k in indexes]
         outputs_batch_ids = [self.outputs_ids[k] for k in indexes]
 
         inputs_list = list()
