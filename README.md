@@ -22,27 +22,28 @@ Directory
         /test_clean
         /test_noise
     /model_save
-    /model_result
+    /model_pred
     /complex_layers
         __init__.py
         STFT.py
-        complex_networks.py
-        complex_activations.py
-    module.py
+        networks.py
+        activation.py
+        normaliztion.py
     model.py
+    model_module.py
     model_loss.py
+    model_data.py
     model_test.py
     model_train.py
-    datagenerator.py
 ```
 #
 # Usage
 ```
-python model_train.py --epoch --batch --optim --model --train_noisy --train_clean --test_noisy --test_clean
+python model_train.py --model dcunet16 --trn ./datasets/subset_noisy/ --trc ./datasets/subset_clean/ --batch 16
+python model_train.py --model dcunet20 --trn ./datasets/subset_noisy/ --trc ./datasets/subset_clean/ --batch 8
 
---optim option is class SDR_Loss class weighted_SDR_Loss
---model option is class DCUnet_16 class DCUnet_20
 
-Not yet complete implementation
-class Complex_BatchNormalization (using Covariance)
+Not yet implementation
+1. Optional SDR_loss, weighted_SDR_loss
+2. 모델 검증
 ```
