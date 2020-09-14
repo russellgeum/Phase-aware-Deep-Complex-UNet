@@ -23,7 +23,7 @@ def data_generator(train_arguments, test_arguments):
       return train_generator, test_generator
 
 
-def loop_train (model, optimizer, train_noisy_speech, train_clean_speech, train_batch_losses):
+def loop_train (model, optimizer, train_noisy_speech, train_clean_speech):
 
       with tf.GradientTape() as tape:
             train_predict_speech = model(train_noisy_speech)
@@ -36,7 +36,7 @@ def loop_train (model, optimizer, train_noisy_speech, train_clean_speech, train_
       return train_loss
 
 
-def loop_test (model, test_noisy_speech, test_clean_speech, test_batch_losses):
+def loop_test (model, test_noisy_speech, test_clean_speech):
       
       'Test loop do not caclultae gradient and backpropagation'
       test_predict_speech = model(test_noisy_speech)
@@ -71,12 +71,12 @@ def model_flow (model, total_epochs, train_generator, test_generator):
 
             'Training Loop'
             for index, (train_noisy_speech, train_clean_speech) in tqdm(enumerate(train_generator)):
-                  loss = loop_train (model, optimizer, train_noisy_speech, train_clean_speech, train_batch_losses)
+                  loss = loop_train (model, optimizer, train_noisy_speech, train_clean_speech)
                   train_batch_losses = train_batch_losses + loss
 
             'Test Loop'
             for index, (test_noisy_speech, test_clean_speech) in tqdm(enumerate(test_generator)):
-                  loss  = loop_test (model, test_noisy_speech, test_clean_speech, test_batch_losses)
+                  loss  = loop_test (model, test_noisy_speech, test_clean_speech)
                   test_batch_losses  = test_batch_losses + loss
 
             'Calculate loss per batch data'
@@ -94,7 +94,7 @@ def model_flow (model, total_epochs, train_generator, test_generator):
 if __name__ == "__main__":
 
       parser = argparse.ArgumentParser(description = 'MODEL SETTING OPTION...')
-      parser.add_argument("--model", type = str, default = "dcunet16", help = "Input model tpe")
+      parser.add_argument("--model", type = str, default = "dcunet20", help = "Input model tpe")
       parser.add_argument("--epoch", type = int, default = 100, help = "Input epochs")
       parser.add_argument("--batch", type = int, default = 32, help = "Input batch size")
       parser.add_argument("--optim", type = str, default = "adam",  help = "Input optimizer option")
