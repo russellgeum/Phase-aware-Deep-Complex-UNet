@@ -27,7 +27,6 @@ from complex_layers.activations import *
 from complex_layers.normalization import *
 
 
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 tranposed_STFT  : transpoed Spectogram, ex) [None, 64, 512] --> [None, 512, 64, 1]
 transpoed_ISTFT : transpoed and squeeze Spectogram (For Inverse Short Time Fourier Transform) [None 512 64 1] --> [None 64 512]

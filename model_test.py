@@ -54,8 +54,8 @@ if __name__ == "__main__":
 
       parser = argparse.ArgumentParser(description = 'SETTING OPTION')
       parser.add_argument("--model", type = str, default = "dcunet16",         help = "Input model type")
-      parser.add_argument("--load", type = str, default = "./model_save/model.h5", help = "Input save model file")
-      parser.add_argument("--data",  type = str, default = "./datasets/unseen/",    help = "Input load unseen speech")
+      parser.add_argument("--load", type = str, default = "./model_save/dcunet1620.h5", help = "Input save model file")
+      parser.add_argument("--data",  type = str, default = "./datasets/unssen_noisy/",    help = "Input load unseen speech")
       parser.add_argument("--save",  type = str, default = "./model_pred/",      help = "Input save predict speech")
       args = parser.parse_args()
 
@@ -65,11 +65,11 @@ if __name__ == "__main__":
       pred_data_path = args.save
 
       if model_type == "dcunet16":
-            model = Naive_DCUnet16().model()
+            model = DCUnet16().model()
             model.summary()
             model.load_weights(load_file_path)
       elif model_type == 'dcunet20':
-            model = Naive_DCUnet20().model()
+            model = DCUnet20().model()
             model.summary()
             model.load_weights(load_file_path)
 

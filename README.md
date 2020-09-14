@@ -39,8 +39,8 @@ Directory
 #
 # Usage
 ```
-python model_train.py --model dcunet16 --trn ./datasets/subset_noisy/ --trc ./datasets/subset_clean/ --batch 16
-python model_train.py --model dcunet20 --trn ./datasets/subset_noisy/ --trc ./datasets/subset_clean/ --batch 8
+python model_train.py --model dcunet16 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 16
+python model_train.py --model dcunet20 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 8
 
 
 Not yet implementation

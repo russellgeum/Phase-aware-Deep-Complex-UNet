@@ -1,9 +1,9 @@
-import os
-import argparse
+import os, argparse
+from model_module import *
+
 from model import *
 from model_loss import *
 from model_data import *
-from model_module import *
 
 from complex_layers.STFT import *
 from complex_layers.networks import *
@@ -15,11 +15,6 @@ print(tf.config.list_physical_devices())
 print("GPU Available: ", tf.test.is_gpu_available('GPU'))
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-DATA_GENERATOR
-LOOP_TRAIN
-LOOP_TEST
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 def data_generator(train_arguments, test_arguments):
 
       train_generator = datagenerator(**train_arguments)
@@ -34,7 +29,6 @@ def loop_train (model, optimizer, train_noisy_speech, train_clean_speech, train_
             train_predict_speech = model(train_noisy_speech)
             # train_loss = weighted_SDR_loss (train_noisy_speech, train_predict_speech, train_clean_speech)
             train_loss = SDR_loss(train_predict_speech, train_clean_speech)
-            # train_loss = SDR_loss(train_noisy_speech, train_predict_speech) # 실수
 
       gradients = tape.gradient(train_loss, model.trainable_variables)
       optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -52,29 +46,22 @@ def loop_test (model, test_noisy_speech, test_clean_speech, test_batch_losses):
       return test_loss
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-def model_flow
-      def learning_rate_scheduler
-            call loop_train
-            call loop_test
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+def learning_rate_scheduler (epoch, learning_rate):
+
+      if (epoch+1) <= 30:
+            return 1.00 * learning_rate
+      elif (epoch+1) > 30 and (epoch+1) <= 60:
+            return 0.20 * learning_rate
+      else:
+            return 0.05 * learning_rate
+      
+
 def model_flow (model, total_epochs, train_generator, test_generator):
-
-      def learning_rate_scheduler (epoch, learning_rate):
-
-            if (epoch+1) <= 30:
-                  return 1.00 * learning_rate
-            elif (epoch+1) > 30 and (epoch+1) <= 60:
-                  return 0.20 * learning_rate
-            else:
-                  return 0.05 * learning_rate
 
       # DEFINE TRAIN STEP, TEST STEP
       train_step = len(os.listdir(train_noisy_path)) // batch_size
       test_step  = len(os.listdir(test_noisy_path)) // batch_size
-      print("""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""")
       print("TRAIN STEPS, TEST STEPS   ", train_step, test_step)
-      print("""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""")
 
       for epoch in tqdm(range (total_epochs)):
 
@@ -96,10 +83,8 @@ def model_flow (model, total_epochs, train_generator, test_generator):
             train_loss = train_batch_losses / train_step
             test_loss  = test_batch_losses / test_step
 
-
-            templet = 'Epoch  :  {:3d},        TRAIN LOSS  :  {:.6f},        TEST LOSS  :  {:.6f}'
+            templet = "Epoch : {:3d},     TRAIN LOSS : {:.5f},     TEST LOSS  :  {:.5f}"
             print(templet.format(epoch+1, train_loss.numpy(), test_loss.numpy()))
-            print(optimizer.learning_rate.numpy())
 
             if ((epoch+1) % 10) == 0: 
                   model.save_weights("./model_save/" + model_type + str(epoch+1) + ".h5")
@@ -109,13 +94,13 @@ def model_flow (model, total_epochs, train_generator, test_generator):
 if __name__ == "__main__":
 
       parser = argparse.ArgumentParser(description = 'MODEL SETTING OPTION...')
-      parser.add_argument("--model", type = str, default = "dcunet20", help = "Input model tpe")
+      parser.add_argument("--model", type = str, default = "dcunet16", help = "Input model tpe")
       parser.add_argument("--epoch", type = int, default = 100, help = "Input epochs")
-      parser.add_argument("--batch", type = int, default = 64, help = "Input batch size")
+      parser.add_argument("--batch", type = int, default = 32, help = "Input batch size")
       parser.add_argument("--optim", type = str, default = "adam",  help = "Input optimizer option")
       parser.add_argument("--lr",    type = float, default = 0.001, help = "Inputs learning rate")
-      parser.add_argument("--trn",   type = str, default = "./datasets/subset_noisy/", help = "Input train noisy path")
-      parser.add_argument("--trc",   type = str, default = "./datasets/subset_clean/", help = "Input train clean phat")
+      parser.add_argument("--trn",   type = str, default = "./datasets/train_noisy/", help = "Input train noisy path")
+      parser.add_argument("--trc",   type = str, default = "./datasets/train_clean/", help = "Input train clean phat")
       parser.add_argument("--ten",   type = str, default = "./datasets/test_noisy/",  help = "Input test noisy path")
       parser.add_argument("--tec",   type = str, default = "./datasets/test_clean/",  help = "Input test clean path")
       args = parser.parse_args()
