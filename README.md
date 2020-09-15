@@ -9,7 +9,7 @@ Papers URL
 Python >= 3.6.9  
 numpy  
 scipy  
-librosa 0.7.2  
+librosa 0.7.2  (with numba 0.48.0)  
 Tensorflow >= 2.1.0  
 #  
 # Directory  
@@ -17,10 +17,11 @@ Tensorflow >= 2.1.0
 Directory
 ./DCUnet
     /datasets
-        /train_clean
-        /train_noise
-        /test_clean
-        /test_noise
+        /mainsets
+            /train_noisy
+            /train_noise
+            /test_clean
+            /test_noise
     /model_save
     /model_pred
     /complex_layers
@@ -39,8 +40,10 @@ Directory
 #
 # Usage
 ```
-python model_train.py --model dcunet16 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 16
-python model_train.py --model dcunet20 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 8
+--loss SDR or wSDR  
+--save "save file name"  
+python model_train.py --model dcunet16 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 16 --save dcunet16_SDR --loss SDR  
+python model_train.py --model dcunet20 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 32 --save dcunet20_wSDR --loss wSDR  
 
 
 Not yet implementation
