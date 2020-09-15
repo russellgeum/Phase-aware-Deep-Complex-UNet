@@ -1,2 +1,4 @@
-python model_train.py --model dcunet16 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 16
-python model_train.py --model dcunet20 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 8
+python ./preprocessing/mixture.py --sp ./datasets/main --nn train_noisy --cn train_clean
+python ./preprocessing/mixture.py --cp ./datasets_original/test_clean --np ./datasets_original/test_noise --sp ./datasets/main --nn train_noisy --cn train_clean
+python model_train.py --model dcunet16 --trn ./datasets/subset/train_noisy/ --trc ./datasets/subset/train_clean/ --ten ./datasets/subset/test_noisy/ --tec ./datasets/subset/test_clean/ --save dcunet16_wSDR
+python model_train.py --model dcunet16 --trn ./datasets/subset/train_noisy/ --trc ./datasets/subset/train_clean/ --ten ./datasets/subset/test_noisy/ --tec ./datasets/subset/test_clean/ --save dcunet16_SDR

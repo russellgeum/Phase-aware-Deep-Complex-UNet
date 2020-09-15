@@ -50,11 +50,11 @@ class datagenerator (tf.keras.utils.Sequence):
     def __data_generation__(self, inputs_ids, outputs_ids):
         'Generates data containing batch_size samples'
         '데이터 네임과 데이터 디렉토리로 전체 경로를 잡고 그 경로에서 소리 파일 로드'
-        inputs_path = os.path.join(self.inputs_dir + inputs_ids) 
+        inputs_path  = os.path.join(self.inputs_dir + inputs_ids)
         outputs_path = os.path.join(self.outputs_dir + outputs_ids)
 
         # return sampling_rate, sound (smapling_rate = 16000)
-        _, inputs = scipy.io.wavfile.read(inputs_path)
+        _, inputs  = scipy.io.wavfile.read(inputs_path)
         _, outputs = scipy.io.wavfile.read(outputs_path)
 
         return inputs, outputs
@@ -67,7 +67,6 @@ class datagenerator (tf.keras.utils.Sequence):
         self.batch_size : 배치사이즈를 의미합니다.
         전체 데이터 갯수에서 배치 사이즈로 나눈 것 == 1 epoch당 iteration 수
         '''
-
         return int(np.floor(len(self.inputs_ids) / self.batch_size))
 
 
@@ -84,6 +83,13 @@ class datagenerator (tf.keras.utils.Sequence):
 
         inputs_batch_ids  = [self.inputs_ids[k] for k in indexes]
         outputs_batch_ids = [self.outputs_ids[k] for k in indexes]
+        # print("--------------")
+        # print(inputs_batch_ids)
+        # print(outputs_batch_ids)
+        # print("--------------")
+
+        inputs_batch_ids  = natsort.natsorted(inputs_batch_ids, reverse = False)
+        outputs_batch_ids = natsort.natsorted(outputs_batch_ids, reverse = False)
 
         inputs_list = list()
         output_list = list()

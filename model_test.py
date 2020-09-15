@@ -52,10 +52,12 @@ def inference (path_list, save_path):
 
 if __name__ == "__main__":
 
+      tf.random.set_seed(seed = 42)
+
       parser = argparse.ArgumentParser(description = 'SETTING OPTION')
-      parser.add_argument("--model", type = str, default = "dcunet16",         help = "Input model type")
-      parser.add_argument("--load", type = str, default = "./model_save/dcunet1620.h5", help = "Input save model file")
-      parser.add_argument("--data",  type = str, default = "./datasets/unssen_noisy/",    help = "Input load unseen speech")
+      parser.add_argument("--model", type = str, default = "dcunet20",         help = "Input model type")
+      parser.add_argument("--load", type = str, default = "./model_save/dcunet2040.h5", help = "Input save model file")
+      parser.add_argument("--data",  type = str, default = "./datasets/fn/",    help = "Input load unseen speech")
       parser.add_argument("--save",  type = str, default = "./model_pred/",      help = "Input save predict speech")
       args = parser.parse_args()
 
@@ -64,14 +66,18 @@ if __name__ == "__main__":
       test_data_path = args.data
       pred_data_path = args.save
 
-      if model_type == "dcunet16":
+
+      if model_type == "naive_dcunet16":
+            model = Naive_DCUnet16().model()
+      elif model_type == "naive_dcunet20":
+            model = Naive_DCUnet20().model()
+      elif model_type == "dcunet16":
             model = DCUnet16().model()
-            model.summary()
-            model.load_weights(load_file_path)
-      elif model_type == 'dcunet20':
+      elif model_type == "dcunet20":
             model = DCUnet20().model()
-            model.summary()
-            model.load_weights(load_file_path)
+
+      model.load_weights(load_file_path)
+      model.summary()
 
       'READ SPEECH FILE'
       noisy_file_list = get_file_list(file_path = test_data_path)

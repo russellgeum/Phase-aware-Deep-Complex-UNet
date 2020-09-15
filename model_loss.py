@@ -4,18 +4,25 @@ from model_module import *
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 'Simply SDR Loss'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-def SDR_loss (pred, true, eps = 1e-8):
-
-    num = K.sum(pred * true)
+def modified_SDR_loss(pred, true, eps = 1e-8):
+    
+    num = K.sum(true * pred)
     den = K.sqrt(K.sum(true * true)) * K.sqrt(K.sum(pred * pred))
-
-    return -(num / (den + eps))
+    
+    return -(num / (den +eps))
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 'Weighted SDR Loss'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 def weighted_SDR_loss (noisy_speech, pred_speech, true_speech):
+
+    def SDR_loss (pred, true, eps = 1e-8):
+
+        num = K.sum(pred * true)
+        den = K.sqrt(K.sum(true * true)) * K.sqrt(K.sum(pred * pred))
+
+        return -(num / (den + eps))
 
     pred_noise = noisy_speech - pred_speech
     true_noise = noisy_speech - true_speech
