@@ -102,9 +102,11 @@ if __name__ == "__main__":
       parser.add_argument("--model", type = str, default = "dcunet20", help = "Input model tpe")
       parser.add_argument("--epoch", type = int, default = 100,        help = "Input epochs")
       parser.add_argument("--batch", type = int, default = 32,         help = "Input batch size")
+
       parser.add_argument("--loss",  type = str, default = "wSDR",     help = "Input Loss function")
       parser.add_argument("--optim", type = str, default = "adam",     help = "Input optimizer option")
       parser.add_argument("--lr",    type = float, default = 0.001,    help = "Inputs learning rate")
+      
       parser.add_argument("--trn",   type = str, default = "./datasets/subnoisy/",    help = "Input train noisy path")
       parser.add_argument("--trc",   type = str, default = "./datasets/subclean/",    help = "Input train clean phat")
       parser.add_argument("--ten",   type = str, default = "./datasets/test_noisy/",  help = "Input test noisy path")

@@ -46,7 +46,7 @@ def inference (path_list, save_path):
                   predict = np.reshape(enhancement_speech, (speech_length, 1))
                   restore.extend(predict)
             restore = np.array(restore)
-            scipy.io.wavfile.write("./model_pred/2000825_" + "{:4d}".format(index1+1) + ".wav", rate = sampling_rate, data = restore)
+            scipy.io.wavfile.write("./model_pred/" + "{:04d}".format(index1+1) + ".wav", rate = sampling_rate, data = restore)
 
 
 
