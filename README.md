@@ -1,12 +1,14 @@
 # Introudction
-Impelmentation Phase-aware Speech Enhnacement Deep Complex U Net  
+Impelmentation Phase-aware Speech Enhnacement Deep Complex UNet  
 This is convolution neural networks model for Speech Enhancement  
 Papers URL
-1. https://openreview.net/pdf?id=SkeRTsAcYm  
-2. https://arxiv.org/abs/1903.03107  
+1. [Phase-aware Speech Enhancement Deep Complex UNet - openreview](https://openreview.net/pdf?id=SkeRTsAcYm)
+2. [Phase-aware Speech Enhancement Deep Complex UNet - arxiv](https://arxiv.org/abs/1903.03107)
+## Architecture
+![archi](./figure/figure1.png)
 #
 # Requirements
-Python >= 3.6.9  
+Python >= 3.6.9 (3.7.6)  
 numpy  
 scipy  
 librosa 0.7.2  (with numba 0.48.0)  
@@ -15,13 +17,12 @@ Tensorflow >= 2.1.0
 # Directory  
 ```
 Directory
-./DCUnet
+./Deep_Complex_UNet
     /datasets
-        /mainsets
-            /train_noisy
-            /train_noise
-            /test_clean
-            /test_noise
+        /train_noisy
+        /train_clean
+        /test_noisy
+        /test_clean
     /model_save
     /model_pred
     /complex_layers
@@ -40,13 +41,9 @@ Directory
 #
 # Usage
 ```
+--model naive_dcunet16 naive_dcunet20 dcunet16 dcunet20
 --loss SDR or wSDR  
 --save "save file name"  
-python model_train.py --model dcunet16 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 16 --save dcunet16_SDR --loss SDR  
-python model_train.py --model dcunet20 --trn ./datasets/train_noisy/ --trc ./datasets/train_clean/ --batch 32 --save dcunet20_wSDR --loss wSDR  
-
-
-Not yet implementation
-1. Optional SDR_loss, weighted_SDR_loss
-2. 모델 검증
+python model_train.py --model dcunet20 --loss wSDR --save dcunet20_default --optim adam --lr 0.002
+python model_train.py --model dcunet16 --loss wSDR --save dcunet16_default --optim adam --lr 0.002
 ```
