@@ -1,3 +1,6 @@
+# Issue!
+Don't use DCUnet16 and DCUnet20 via ComplexBatchNormalization  
+You can use only Naive_DCUnet series  
 # Introuduction
 Impelmentation Phase-aware Speech Enhnacement Deep Complex UNet  
 This is convolution neural networks model for Speech Enhancement  
