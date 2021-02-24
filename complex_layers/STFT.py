@@ -44,12 +44,9 @@ imag : [batch_size, time_step, frequency_bin]
 
 'Short Time Fourier Transform via Neural Network'
 class STFT_network (tf.keras.layers.Layer):
-    
 
     def __init__ (self, window_length = 1024, over_lapping = 256, padding = "same"):
-        
         super(STFT_network, self).__init__()
-        
         self.window_length = window_length
         self.frequency_bin = int(self.window_length/2 + 1)
         self.over_lapping  = over_lapping
@@ -71,7 +68,6 @@ class STFT_network (tf.keras.layers.Layer):
         self.imag_kernel_init = self.imag_kernel_init.T
         self.real_kernel_init = self.real_kernel_init[:, None, :]
         self.imag_kernel_init = self.imag_kernel_init[:, None, :]
-        
         
     def build (self, inputs_shape):
         '''
@@ -98,7 +94,6 @@ class STFT_network (tf.keras.layers.Layer):
         
 
     def call (self, input_signal):
-
         'inputs_signal : 3D Tensor [batch_size, signal_length, channel_number]'
         real = self.real_fourier_convolution(input_signal)
         imag = self.imag_foruier_convolution(input_signal)
@@ -108,12 +103,8 @@ class STFT_network (tf.keras.layers.Layer):
 
 'Inverse Short Time Fourier Transform via Neural Network'    
 class ISTFT_network (tf.keras.layers.Layer):
-    
-
     def __init__ (self, window_length = 1024, over_lapping = 256, padding = "same"):
-        
         super(ISTFT_network, self).__init__()
-        
         self.window_length = window_length
         self.over_lapping  = over_lapping
         
@@ -132,22 +123,18 @@ class ISTFT_network (tf.keras.layers.Layer):
         self.inverse_basis = self.inverse_window * np.linalg.pinv(self.fourier_basis).T[ :, None, None, ]
         self.inverse_basis = self.inverse_basis.T
 
-        
     def inverse_stft_window (self, window, hop_length):
+        'Ceiling Division'
+        window_length = len(window)
+        denom = window ** 2
+        overlaps = -(-window_length // hop_length) 
+        denom = np.pad(denom, (0, overlaps * hop_length - window_length), 'constant')
+        denom = np.reshape(denom, (overlaps, hop_length)).sum(0)
+        denom = np.tile(denom, (overlaps, 1)).reshape(overlaps * hop_length)
 
-            'Ceiling Division'
-            window_length = len(window)
-            denom = window ** 2
-            overlaps = -(-window_length // hop_length) 
-            denom = np.pad(denom, (0, overlaps * hop_length - window_length), 'constant')
-            denom = np.reshape(denom, (overlaps, hop_length)).sum(0)
-            denom = np.tile(denom, (overlaps, 1)).reshape(overlaps * hop_length)
-
-            return window / denom[:window_length]
-        
+        return window / denom[:window_length]
         
     def build (self, inputs_shape):
-        
         self.expand_dims_lambda = Lambda(lambda x: K.expand_dims(x, axis = 2))
         self.Conv2DTranspose    = Conv2DTranspose(filters = 1, 
                                                 kernel_size = (self.kernel_size, 1), 
@@ -156,9 +143,7 @@ class ISTFT_network (tf.keras.layers.Layer):
                                                 kernel_initializer = tf.keras.initializers.Constant(self.inverse_basis),
                                                 trainable = False)
         self.squeeze_dims_lambda = Lambda(lambda x: K.squeeze(x, axis = 2))
-        
         super(ISTFT_network, self).build(inputs_shape)
-        
         
     def call (self, real, imag):
         '''
