@@ -2,22 +2,17 @@ from model_module import *
 
 
 class Naive_DCUnet16 ():
-
     def __init__ (self, input_size = 16384, length = 1023, over_lapping = 256, padding = "same", norm_trainig = True):
-
         self.input_size   = input_size
         self.length       = length
         self.over_lapping = over_lapping
         self.padding      = padding
         self.norm_trainig = norm_trainig
-
         self.STFT_network_arguments = {"window_length" : self.length, "over_lapping" : self.over_lapping, "padding" : self.padding}
 
     
     def model (self):
-
-        noisy_speech = Input (shape = (self.input_size, 1), name = "noisy_speech")
-
+        noisy_speech         = Input (shape = (self.input_size, 1), name = "noisy_speech")
         stft_real, stft_imag = STFT_network(**self.STFT_network_arguments)(noisy_speech)
         stft_real, stft_imag = tranposed_STFT(stft_real, stft_imag)
 
@@ -47,24 +42,18 @@ class Naive_DCUnet16 ():
         return Model(inputs = [noisy_speech], outputs = [enhancement_speech])
 
 
-
 class Naive_DCUnet20 ():
-
     def __init__ (self, input_size = 16384, length = 1023, over_lapping = 256, padding = "same", norm_trainig = True):
-
         self.input_size   = input_size
         self.length       = length
         self.over_lapping = over_lapping
         self.padding      = padding
         self.norm_trainig = norm_trainig
-
         self.STFT_network_arguments = {"window_length" : self.length, "over_lapping" : self.over_lapping, "padding" : self.padding}
 
     
     def model (self):
-
-        noisy_speech = Input (shape = (self.input_size, 1), name = "noisy_speech")
-
+        noisy_speech         = Input (shape = (self.input_size, 1), name = "noisy_speech")
         stft_real, stft_imag = STFT_network(**self.STFT_network_arguments)(noisy_speech)
         stft_real, stft_imag = tranposed_STFT(stft_real, stft_imag)
 
@@ -94,28 +83,22 @@ class Naive_DCUnet20 ():
 
         enhancement_speech = ISTFT_network(**self.STFT_network_arguments)(enhancement_stft_real, enhancement_stft_imag)
         enhancement_speech = tf.reshape(enhancement_speech, (-1, self.input_size, 1))
-
         return Model(inputs = [noisy_speech], outputs = [enhancement_speech])
 
 
 
 class DCUnet16 ():
-
     def __init__ (self, input_size = 16384, length = 1023, over_lapping = 256, padding = "same", norm_trainig = True):
-
         self.input_size   = input_size
         self.length       = length
         self.over_lapping = over_lapping
         self.padding      = padding
         self.norm_trainig = norm_trainig
-
         self.STFT_network_arguments = {"window_length" : self.length, "over_lapping" : self.over_lapping, "padding" : self.padding}
 
     
     def model (self):
-
-        noisy_speech = Input (shape = (self.input_size, 1), name = "noisy_speech")
-
+        noisy_speech         = Input (shape = (self.input_size, 1), name = "noisy_speech")
         stft_real, stft_imag = STFT_network(**self.STFT_network_arguments)(noisy_speech)
         stft_real, stft_imag = tranposed_STFT(stft_real, stft_imag)
 
@@ -147,22 +130,17 @@ class DCUnet16 ():
 
 
 class DCUnet20 ():
-
     def __init__ (self, input_size = 16384, length = 1023, over_lapping = 256, padding = "same", norm_trainig = True):
-
         self.input_size   = input_size
         self.length       = length
         self.over_lapping = over_lapping
         self.padding      = padding
         self.norm_trainig = norm_trainig
-
         self.STFT_network_arguments = {"window_length" : self.length, "over_lapping" : self.over_lapping, "padding" : self.padding}
 
     
     def model (self):
-
-        noisy_speech = Input (shape = (self.input_size, 1), name = "noisy_speech")
-
+        noisy_speech         = Input (shape = (self.input_size, 1), name = "noisy_speech")
         stft_real, stft_imag = STFT_network(**self.STFT_network_arguments)(noisy_speech)
         stft_real, stft_imag = tranposed_STFT(stft_real, stft_imag)
 
