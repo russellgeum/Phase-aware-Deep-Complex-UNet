@@ -16,7 +16,6 @@ sampling_rate = 16000
 
 'GET UNSEEN SPEECH FILE PATH'
 def get_file_list (file_path):
-
       file_list = []
 
       for root, dirs, files in (os.walk(file_path)):
@@ -34,7 +33,6 @@ def get_file_list (file_path):
 
 'INFERENCE DEEP LEARNING MODEL'
 def inference (path_list, save_path):
-
       for index1, speech_file_path in tqdm(enumerate (path_list)):
             _, unseen_noisy_speech = scipy.io.wavfile.read(speech_file_path)
             restore = []
@@ -51,9 +49,7 @@ def inference (path_list, save_path):
 
 
 if __name__ == "__main__":
-
       tf.random.set_seed(seed = 42)
-
       parser = argparse.ArgumentParser(description = 'SETTING OPTION')
       parser.add_argument("--model", type = str, default = "dcunet20",         help = "Input model type")
       parser.add_argument("--load", type = str, default = "./model_save/dcunet2040.h5", help = "Input save model file")
@@ -61,7 +57,7 @@ if __name__ == "__main__":
       parser.add_argument("--save",  type = str, default = "./model_pred/",      help = "Input save predict speech")
       args = parser.parse_args()
 
-      model_type = args.model
+      model_type     = args.model
       load_file_path = args.load
       test_data_path = args.data
       pred_data_path = args.save

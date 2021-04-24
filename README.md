@@ -1,6 +1,9 @@
 # Issue!
 Don't use DCUnet16 and DCUnet20 via ComplexBatchNormalization  
 You can use only Naive_DCUnet series  
+컴플렉스 배치 정규화를 적용한 DCUnet16, DCUnet20을 사용하지 마세요.  
+텐서플로우 최신 버전에서는 위 레이어를 위한 기능이 삭제되었습니다.  
+Naive하게 배치 정규화를 사용한 모델만 참고하세요.   
 # Introuduction
 Impelmentation Phase-aware Speech Enhnacement Deep Complex UNet  
 This is convolution neural networks model for Speech Enhancement  
@@ -8,7 +11,7 @@ Papers URL
 1. [Phase-aware Speech Enhancement Deep Complex UNet - openreview](https://openreview.net/pdf?id=SkeRTsAcYm)
 2. [Phase-aware Speech Enhancement Deep Complex UNet - arxiv](https://arxiv.org/abs/1903.03107)
 ## Architecture
-![archi](./figure/figure1.png)
+![archi](./sample/sample.png)
 #
 # Requirements
 Python >= 3.6.9 (3.7.6)  

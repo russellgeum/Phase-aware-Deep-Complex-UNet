@@ -21,7 +21,7 @@ from tensorflow.keras.activations import *
 from tensorflow.keras.initializers import *
 from tensorflow.python.client import device_lib
 
-from complex_layers.STFT import *
+from complex_layers.stft import *
 from complex_layers.networks import *
 from complex_layers.activations import *
 from complex_layers.normalization import *
@@ -51,7 +51,6 @@ complex_layers/
     Make a seperate function module (complex BatchNomalization)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 def tranposed_STFT (real, imag):
-    
     real = tf.transpose(real, perm = (0, 2, 1))
     imag = tf.transpose(imag, perm = (0, 2, 1))
 
@@ -62,7 +61,6 @@ def tranposed_STFT (real, imag):
 
 
 def transpoed_ISTFT (real, imag):
-    
     real = tf.transpose(real, (0, 2, 1, 3))
     imag = tf.transpose(imag, (0, 2, 1, 3))
 
@@ -73,7 +71,6 @@ def transpoed_ISTFT (real, imag):
     
 
 def mask_processing (real, imag, stft_real, stft_imag):
-    
     magnitude = tf.tanh(tf.sqrt(tf.square(real) + tf.square(imag)))
     unit_real = tf.divide(real, tf.sqrt(tf.square(real) + tf.square(imag)))
     unit_imag = tf.divide(imag, tf.sqrt(tf.square(real) + tf.square(imag)))
@@ -88,8 +85,7 @@ def mask_processing (real, imag, stft_real, stft_imag):
 
 
 def complex_BatchNormalization2d (real, imag, training = None):
-
-    inputs = tf.concat([real, imag], axis = -1)
+    inputs  = tf.concat([real, imag], axis = -1)
     outputs = complex_BatchNorm2d()(inputs, training = training)
 
     input_dim = outputs.shape[-1] // 2
@@ -103,7 +99,6 @@ def complex_BatchNormalization2d (real, imag, training = None):
 'with Naive complex_BatchNormalization module'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 def encoder_module (real, imag, filters, kernel_size, strides, training = True):
-    
     conv_real, conv_imag = complex_Conv2D(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
     out_real, out_imag   = CLeaky_ReLU(conv_real, conv_imag)
     out_real, out_imag   = complex_NaiveBatchNormalization()(conv_real, conv_imag, training = True)
@@ -112,7 +107,6 @@ def encoder_module (real, imag, filters, kernel_size, strides, training = True):
 
 
 def decoder_module (real, imag, concat_real, concat_imag, filters, kernel_size, strides, training = True):
-
     if concat_real == None and concat_imag == None:
         pass
     else:
@@ -129,7 +123,6 @@ def decoder_module (real, imag, concat_real, concat_imag, filters, kernel_size, 
 'with Naive complex_BatchNormalization module'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 def convariance_encoder_module (real, imag, filters, kernel_size, strides, training = True):
-    
     conv_real, conv_imag = complex_Conv2D(filters = filters, kernel_size = kernel_size, strides = strides)(real, imag)
     out_real, out_imag   = CLeaky_ReLU(conv_real, conv_imag)
     out_real, out_imag   = complex_BatchNormalization2d(conv_real, conv_imag, training = True)
@@ -138,7 +131,6 @@ def convariance_encoder_module (real, imag, filters, kernel_size, strides, train
 
 
 def convariance_decoder_module (real, imag, concat_real, concat_imag, filters, kernel_size, strides, training = True):
-
     if concat_real == None and concat_imag == None:
         pass
     else:
