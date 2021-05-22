@@ -20,7 +20,7 @@ scipy
 librosa 0.7.2  (with numba 0.48.0)  
 Tensorflow >= 2.1.0  
 #  
-# Directory  
+# Folder  
 ```
 Directory
 ./Deep_Complex_UNet
