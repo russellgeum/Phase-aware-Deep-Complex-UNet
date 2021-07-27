@@ -5,24 +5,22 @@ from model_module import *
 'DATAGENERATOR'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 class datagenerator (tf.keras.utils.Sequence):
-
-    def __init__(self,  inputs_ids, 
-                        outputs_ids,
-                        inputs_dir,
-                        outputs_dir,
-                        batch_size = 16,
-                        shuffle = True):
-
+    def __init__(
+            self,  
+            inputs_ids, 
+            outputs_ids,
+            inputs_dir,
+            outputs_dir,
+            batch_size = 16,
+            shuffle = True):    
         """
         inputs_ids  : 입력할 noisy speech의 데이터 네임
         outputs_ids : 타겟으로 삼을 clean speech의 데이터 네임
-
         inputs_dir  : 입력할 noisy speech의 파일 경로
         outputs_dir : 타겟으로 삼을 clean speech의 파일 경로
         """
         self.inputs_ids  = inputs_ids
         self.outputs_ids = outputs_ids
-        
         self.inputs_dir  = inputs_dir
         self.outputs_dir = outputs_dir
         
@@ -80,7 +78,6 @@ class datagenerator (tf.keras.utils.Sequence):
         5. np.array 형태로 바꾸어준 후 리턴
         """
         indexes = self.indexes[index * self.batch_size: (index + 1) * self.batch_size]
-
         inputs_batch_ids  = [self.inputs_ids[k] for k in indexes]
         outputs_batch_ids = [self.outputs_ids[k] for k in indexes]
         # print("--------------")
@@ -95,16 +92,12 @@ class datagenerator (tf.keras.utils.Sequence):
         output_list = list()
 
         for inputs, outputs in zip(inputs_batch_ids, outputs_batch_ids):
-            
             x, y = self.__data_generation__(inputs, outputs)
-
             x = np.reshape(x, (16384, 1))
             y = np.reshape(y, (16384, 1))
-
             inputs_list.append(x)
             output_list.append(y)
 
         inputs_list = np.array(inputs_list)
         output_list = np.array(output_list)
-        
         return inputs_list, output_list

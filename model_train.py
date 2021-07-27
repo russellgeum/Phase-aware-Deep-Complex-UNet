@@ -1,11 +1,11 @@
 import os
 import argparse
-from model import *
 from model_loss import *
 from model_data import *
 from model_module import *
-from complex_layers.STFT import *
-from complex_layers.networks import *
+from complex_layers import *
+from complex_layers.stft import *
+from complex_layers.layer import *
 from complex_layers.activations import *
 
 'PRINT SYSTEM INFORMATION'
@@ -16,6 +16,7 @@ def data_generator(train_arguments, test_arguments):
       train_generator = datagenerator(**train_arguments)
       test_generator  = datagenerator(**test_arguments)
       return train_generator, test_generator
+
 
 @tf.function
 def loop_train (model, optimizer, train_noisy_speech, train_clean_speech):
@@ -30,6 +31,7 @@ def loop_train (model, optimizer, train_noisy_speech, train_clean_speech):
       optimizer.apply_gradients(zip(gradients, model.trainable_variables))
       return train_loss
 
+
 @tf.function
 def loop_test (model, test_noisy_speech, test_clean_speech):
       'Test loop do not caclultae gradient and backpropagation'
@@ -38,8 +40,8 @@ def loop_test (model, test_noisy_speech, test_clean_speech):
             test_loss = modified_SDR_loss(test_predict_speech, test_clean_speech)
       elif loss_function == "wSDR":
             test_loss = weighted_SDR_loss(test_noisy_speech, test_predict_speech, test_clean_speech)
-
       return test_loss
+
 
 def learning_rate_scheduler (epoch, learning_rate):
       if (epoch+1) <= int(0.5*epoch):
@@ -49,6 +51,7 @@ def learning_rate_scheduler (epoch, learning_rate):
       else:
             return 0.05 * learning_rate
       
+
 def model_flow (model, total_epochs, train_generator, test_generator):
       # DEFINE TRAIN STEP, TEST STEP
       train_step = len(os.listdir(train_noisy_path)) // batch_size
