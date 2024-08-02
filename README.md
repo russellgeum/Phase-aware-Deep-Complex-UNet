@@ -6,18 +6,18 @@ Papers URL
 2. [Phase-aware Speech Enhancement Deep Complex UNet - arxiv](https://arxiv.org/abs/1903.03107)  
 ## Architecture
 ![archi](./sample/sample.png)  
-## Issue!
+## Warning
 Don't use DCUnet16 and DCUnet20 via ComplexBatchNormalization  
 You can use only Naive_DCUnet series  
-컴플렉스 배치 정규화를 적용한 DCUnet16, DCUnet20을 사용하지 마세요.  
-(텐서플로우 최신 버전에서는 위 레이어를 위한 기능이 삭제되었습니다.)  
-Naive하게 배치 정규화를 사용한 모델만 참고하세요. 
+(In the latest version of TensorFlow, the functionality for the above layer has been removed)
 ## Requirements
+```
 Python >= 3.6.9 (3.7.6)  
 numpy  
 scipy  
 librosa == 0.7.2  (with numba 0.48.0)  
-Tensorflow == 2.1.0  
+Tensorflow == 2.1.0
+```  
 ## Folder  
 ```
 Directory
